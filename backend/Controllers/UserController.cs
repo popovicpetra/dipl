@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using backend.Database;
 using backend.Models.Entities.UserEntitet;
+using backend.Services.UserService;
 using backend.Token;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,21 +17,20 @@ namespace backend.Controllers
     public class UserController : ControllerBase
     {
        
-        private readonly AppDbContext dbcontex;
+        
+        private readonly IUserService userService;
         private readonly TokenGenerator tokenGenerator;
 
-        public UserController(AppDbContext dbcontex, TokenGenerator tokenGenerator)
+        public UserController(IUserService userService, TokenGenerator tokenGenerator)
         {
-            this.dbcontex = dbcontex;
+            this.userService = userService;
             this.tokenGenerator = tokenGenerator;
         }
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginUserDto dto)
         {
-            var user = await dbcontex.User
-                .Include(u => u.TipUser)
-                .FirstOrDefaultAsync(u => u.Mejl == dto.Mejl);
+            var user = await userService.VratiUsera(dto);
 
             if (user == null)
             {

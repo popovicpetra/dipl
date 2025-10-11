@@ -1,5 +1,6 @@
 ﻿using backend.Database;
 using backend.Models.Entities;
+using backend.Services.IzdanjeService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,21 +11,21 @@ namespace backend.Controllers
     [ApiController]
     public class IzdanjeController : ControllerBase
     {
-        private readonly AppDbContext dbContext;
+        private readonly IIzdanjeService izdanjeService;
 
-        public IzdanjeController(AppDbContext dbContext)
+        public IzdanjeController(IIzdanjeService izdanjeService)
         {
-            this.dbContext = dbContext;
+            this.izdanjeService = izdanjeService;
         }
 
         [HttpGet]
-        public IActionResult VratiSvaIzdanja() { 
-            var izdanja =  dbContext.Izdanje.ToList();
+        public async Task<IActionResult> VratiSvaIzdanja() { 
+            var izdanja = await izdanjeService.VratiSvaIzdanja();
             return Ok(izdanja);
         }
         [Authorize]
         [HttpPost]
-        public IActionResult dodajIzdanje(AddIzdanjeDto dto) {
+        public async Task<IActionResult> DodajIzdanje(AddIzdanjeDto dto) {
 
             var tip = User.Claims.FirstOrDefault(c => c.Type == "TipUser")?.Value;
 
@@ -37,8 +38,7 @@ namespace backend.Controllers
                 BrojIzdanja = dto.BrojIzdanja,
             };
 
-            dbContext.Add(izdanje);
-            dbContext.SaveChanges();
+            await izdanjeService.DodajIzdanje(izdanje);
 
             return Ok(izdanje);
         }

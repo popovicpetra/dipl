@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using backend.Token;
+using backend.Services;
+using backend.Services.IzdanjeService;
+using backend.Services.UserService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +40,9 @@ builder.Services.AddAuthentication(options =>
     };
 });
 builder.Services.AddScoped<TokenGenerator>();
+builder.Services.AddSingleton<AzureBlobService>();
+builder.Services.AddScoped<IIzdanjeService,IzdanjeService>();
+builder.Services.AddScoped<IUserService,UserService>();
 
 var app = builder.Build();
 
