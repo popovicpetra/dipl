@@ -30,7 +30,8 @@ namespace backend.Token
             var claims = new[]
             {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim("TipUser", user.TipUser.Naziv)
+            new Claim("UserId", user.Id.ToString()),
+            new Claim(ClaimTypes.Role, user.TipUser.Naziv)
              };
 
             //var token = new JwtSecurityToken(

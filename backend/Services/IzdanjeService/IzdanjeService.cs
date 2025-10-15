@@ -1,5 +1,5 @@
 ﻿using backend.Database;
-using backend.Models.Entities;
+using backend.Models.Entities.IzdanjeEntitet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

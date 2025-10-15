@@ -5,6 +5,7 @@ using backend.Database;
 using backend.Models.Entities.UserEntitet;
 using backend.Services.UserService;
 using backend.Token;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,9 +46,28 @@ namespace backend.Controllers
             }
             var token = tokenGenerator.GenerateJwtToken(user);
 
-            return Ok(new { token });
+            //OVO SAM DODALA
+            Response.Cookies.Append("jwt", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddHours(2)
+            });
 
-            //return Ok("Uspeh");
+            //return Ok(new { token });
+
+            return Ok("Uspesan login");
+        }
+
+        [Authorize]
+        [HttpGet("me")]
+        public IActionResult Me()
+        {
+            return Ok(new
+            {
+                Role = User.FindFirstValue(ClaimTypes.Role)
+            });
         }
     }
 }

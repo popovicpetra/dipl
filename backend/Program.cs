@@ -7,6 +7,9 @@ using backend.Token;
 using backend.Services;
 using backend.Services.IzdanjeService;
 using backend.Services.UserService;
+using backend.Services.RadService;
+using backend.Services.TipRadaService;
+using backend.Services.VerzijaRadaService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,11 +41,44 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
+    //i ovo dodajem
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // pokušaj da uzme token iz cookie-ja "jwt"
+            var token = context.Request.Cookies["jwt"];
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Token = token;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
 builder.Services.AddScoped<TokenGenerator>();
 builder.Services.AddSingleton<AzureBlobService>();
 builder.Services.AddScoped<IIzdanjeService,IzdanjeService>();
 builder.Services.AddScoped<IUserService,UserService>();
+builder.Services.AddScoped<IRadService,RadService>();
+builder.Services.AddScoped<ITipRadaService, TipRadaService>();
+builder.Services.AddScoped<IVerzijaRadaService,VerzijaRadaService>();
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials(); 
+        });
+});
+
 
 var app = builder.Build();
 
@@ -55,6 +91,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthentication(); // ovo je dodato
 app.UseAuthorization();
 

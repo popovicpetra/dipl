@@ -1,6 +1,12 @@
-﻿using backend.Database;
-using backend.Models.Entities;
+﻿using System.Security.Claims;
+using backend.Database;
+using backend.Models.Entities.IzdanjeEntitet;
+using backend.Models.Entities.RadEntitet;
+using backend.Models.Entities.VerzijaRadaEntitet;
+using backend.Services;
 using backend.Services.IzdanjeService;
+using backend.Services.RadService;
+using backend.Services.VerzijaRadaService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,34 +18,37 @@ namespace backend.Controllers
     public class IzdanjeController : ControllerBase
     {
         private readonly IIzdanjeService izdanjeService;
+       
 
         public IzdanjeController(IIzdanjeService izdanjeService)
         {
             this.izdanjeService = izdanjeService;
+            
         }
 
+        [Authorize(Roles = "Editor, Lektor, Sekretar, Saradnik")]
         [HttpGet]
         public async Task<IActionResult> VratiSvaIzdanja() { 
             var izdanja = await izdanjeService.VratiSvaIzdanja();
             return Ok(izdanja);
         }
-        [Authorize]
+
+        [Authorize(Roles ="Editor")]
         [HttpPost]
         public async Task<IActionResult> DodajIzdanje(AddIzdanjeDto dto) {
 
-            var tip = User.Claims.FirstOrDefault(c => c.Type == "TipUser")?.Value;
-
-            if (tip != "Editor")
-                return Forbid(); 
+            var userIdStr = User.FindFirstValue("UserId");
+            var userId = Guid.Parse(userIdStr);
 
             var izdanje = new Izdanje
             {
                 Naziv = dto.Naziv,
-                BrojIzdanja = dto.BrojIzdanja,
+                Volume = dto.Volume,
+                Broj = dto.Broj,
+                RecAutora = dto.RecAutora,
+                idUser = userId
             };
-
             await izdanjeService.DodajIzdanje(izdanje);
-
             return Ok(izdanje);
         }
     }

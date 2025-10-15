@@ -1,4 +1,4 @@
-﻿using backend.Models.Entities;
+﻿using backend.Models.Entities.IzdanjeEntitet;
 
 namespace backend.Services.IzdanjeService
 {
