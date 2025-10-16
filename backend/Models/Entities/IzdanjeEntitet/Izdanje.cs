@@ -10,6 +10,7 @@ namespace backend.Models.Entities.IzdanjeEntitet
         public int Volume { get; set; }
         public int Broj { get; set; }
         public string RecAutora { get; set; }
+        public bool Izdato {  get; set; }
         public Guid idUser { get; set; }
         [ForeignKey("idUser")]
         public User User { get; set; }

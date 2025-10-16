@@ -17,8 +17,8 @@ namespace backend.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-       
-        
+
+
         private readonly IUserService userService;
         private readonly TokenGenerator tokenGenerator;
 
@@ -39,7 +39,7 @@ namespace backend.Controllers
             }
 
             bool valid = BCrypt.Net.BCrypt.Verify(dto.Lozinka, user.Lozinka);
-            
+
             if (!valid)
             {
                 return Unauthorized("Pogrešna lozinka.");
@@ -69,5 +69,22 @@ namespace backend.Controllers
                 Role = User.FindFirstValue(ClaimTypes.Role)
             });
         }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Append("jwt", "", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddHours(-1)
+            });
+
+
+            return Ok("Uspesno ste se izlogovali");
+        }
+
     }
 }

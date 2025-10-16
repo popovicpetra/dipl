@@ -56,12 +56,10 @@ namespace backend.Controllers
                 Datum = DateTime.Now,
                 IdRad = rad.Id
             }; 
-
             await verzijaService.DodajVerziju(pocetnaVerzija);
-
             return Ok(new { Rad = rad, Verzija = pocetnaVerzija});
-
         }
+
 
     }
 }

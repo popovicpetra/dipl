@@ -42,5 +42,15 @@ namespace backend.Controllers
             // Vraća fajl sa originalnim imenom za preuzimanje
             return File(stream, mimeType, fileName);
         }
+
+        [HttpDelete("{file}")]
+        public async Task<IActionResult> Obrisi(string file)
+        {
+            bool uspeh = await _blobService.DeleteAsync(file);
+            if (!uspeh)
+                return NotFound("Ne moze se naci ovaj fajl");
+
+            return Ok(uspeh);
+        }
     }
 }
