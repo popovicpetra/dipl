@@ -2,6 +2,10 @@
 {
     public enum Status
     {
-        Pocetni
+        Pocetni,
+        ZaLekturu,
+        GotovaLektura,
+        ZaPripremu,
+        GotovaPriprema
     }
 }

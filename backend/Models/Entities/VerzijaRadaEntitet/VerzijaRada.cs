@@ -1,4 +1,8 @@
-﻿namespace backend.Models.Entities.VerzijaRadaEntitet
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using backend.Models.Entities.RadEntitet;
+
+namespace backend.Models.Entities.VerzijaRadaEntitet
 {
     public class VerzijaRada
     {
@@ -10,5 +14,8 @@
         public string? Napomena { get; set; }
         public DateTime Datum {  get; set; }
         public Guid IdUser { get; set; }
+        [ForeignKey("IdRad")]
+        [JsonIgnore]
+        public virtual Rad Rad { get; set; }
     }
 }

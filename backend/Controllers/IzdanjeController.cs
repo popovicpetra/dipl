@@ -49,16 +49,7 @@ namespace backend.Controllers
 
             var userId = Guid.Parse(userIdStr);
 
-            var izdanje = new Izdanje
-            {
-                Naziv = dto.Naziv,
-                Volume = dto.Volume,
-                Broj = dto.Broj,
-                RecAutora = dto.RecAutora,
-                Izdato = dto.Izdato,
-                idUser = userId
-            };
-            await izdanjeService.DodajIzdanje(izdanje);
+            var izdanje = await izdanjeService.DodajIzdanje(userId, dto);
             return Ok(izdanje);
         }
 
@@ -69,6 +60,20 @@ namespace backend.Controllers
             var radovi = await izdanjeService.VratiSveRadoveZaIzdanje(id);
             return Ok(radovi);
         }
+
+        [Authorize(Roles = "Editor")]
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> IzmeniIzdanje(Guid id, UpdateIzdanjeDto dto)
+        {
+            var izmena = await izdanjeService.IzmeniIzdanje(id, dto);
+            if (!izmena)
+            {
+                return NotFound("Izdanje nije pronadjeno");
+            }
+
+            return NoContent();
+        }
+
 
     }
 }

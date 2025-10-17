@@ -81,8 +81,6 @@ namespace backend.Controllers
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddHours(-1)
             });
-
-
             return Ok("Uspesno ste se izlogovali");
         }
 

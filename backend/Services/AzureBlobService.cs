@@ -1,4 +1,5 @@
 ﻿using Azure.Storage.Blobs;
+using backend.Models.Entities.VerzijaRadaEntitet;
 namespace backend.Services
 {
     public class AzureBlobService
@@ -30,17 +31,29 @@ namespace backend.Services
         }
 
         // Download fajla
-        public async Task<Stream?> DownloadAsync(string fileName)
+        public async Task<DownloadVerzijaDto?> DownloadAsync(string fileName)
         {
             var blobClient = _containerClient.GetBlobClient(fileName);
+            
+            if (!await blobClient.ExistsAsync())
+                return null;
 
-            if (await blobClient.ExistsAsync())
+            var odgovor = await blobClient.DownloadAsync();
+            var ekstenzija = Path.GetExtension(fileName).ToLowerInvariant();
+            var mime = ekstenzija switch
             {
-                var response = await blobClient.DownloadAsync();
-                return response.Value.Content; // binarni stream fajla
-            }
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".doc" => "application/msword",
+                ".pdf" => "application/pdf",
+                _ => "application/octet-stream"
+            };
 
-            return null;
+            return new DownloadVerzijaDto
+            {
+                Stream = odgovor.Value.Content,
+                MimeType = mime,
+                FileName = fileName
+            };
         }
 
         // Brisanje fajla

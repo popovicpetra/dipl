@@ -14,14 +14,12 @@ namespace backend.Controllers
     public class RadController : ControllerBase
     {
         private readonly IRadService radService;
-        private readonly AzureBlobService blobService;
-        private readonly IVerzijaRadaService verzijaService;
+       
 
-        public RadController(IRadService radService, AzureBlobService blobService, IVerzijaRadaService verzijaService)
+        public RadController(IRadService radService)
         {
             this.radService = radService;
-            this.blobService = blobService;
-            this.verzijaService = verzijaService;
+            
         }
 
         [Authorize(Roles = "Editor")]
@@ -29,35 +27,26 @@ namespace backend.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> DodajRadIPocetnuVerziju([FromForm] AddRadDto dto)
         {
-            var rad = new Rad
-            {
-                Naziv = dto.Naziv,
-                RedniBroj = dto.RedniBroj,
-                DOI = dto.DOI,
-                IdIzdanje = dto.IdIzdanje,
-                IdTipRada = dto.IdTipRada,
-            };
+            var userId = User.Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
 
-            await radService.DodajRad(rad);
-
-            var url = await blobService.UploadAsync(dto.FormFile);
-
-            var userIdClaim = User.Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
-
-            if (userIdClaim == null)
+            if (userId == null)
                 return Unauthorized("Nedostaje ID korisnika u tokenu.");
+            Guid id = Guid.Parse(userId);
 
-            var pocetnaVerzija = new VerzijaRada
-            {
-                IdUser = Guid.Parse(userIdClaim),
-                Status = Status.Pocetni,
-                BrojVerzije = 1,
-                Link = url,
-                Datum = DateTime.Now,
-                IdRad = rad.Id
-            }; 
-            await verzijaService.DodajVerziju(pocetnaVerzija);
-            return Ok(new { Rad = rad, Verzija = pocetnaVerzija});
+            var (rad, verzija) = await radService.DodajRadIPocetnuVerziju(dto, id);
+
+            return Ok(new { Rad = rad, Verzija = verzija});
+        }
+
+        [HttpPost("status")]
+        public async Task<IActionResult> VratiRadove([FromBody] RadFilterDto filter)
+        {
+            if (filter == null || filter.IdIzdanje == Guid.Empty || string.IsNullOrEmpty(filter.Status))
+                return BadRequest("Neispravan zahtev.");
+
+            var radovi = await radService.VratiRadoveIVerzije(filter);
+
+            return Ok(radovi);
         }
 
 
